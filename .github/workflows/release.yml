@@ -1,0 +1,68 @@
+# Builds gss.exe and attaches it to GitHub releases.
+#
+# - Publishing a release: the tests run, gss.exe is built from the release's tag and checked, and
+#   gss.exe plus gss.exe.sha256 are attached to the release.
+# - Run manually (Actions > Build gss.exe > Run workflow): with a tag, does the same for that
+#   existing release; without one, builds the chosen branch and keeps gss.exe as a workflow artifact.
+
+name: Build gss.exe
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and attach gss.exe to (e.g. v0.1.2). Leave empty to only build."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          # The oldest supported version, so gss.exe can't depend on anything newer
+          python-version: "3.10"
+
+      - name: Run the tests
+        run: python -m unittest -v
+
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller==6.11.1
+
+      - name: Build gss.exe
+        run: python -m PyInstaller packaging/gss.spec --noconfirm
+
+      - name: Check that gss.exe works
+        run: python packaging/smoke_test.py dist/gss.exe "$env:TAG"
+
+      - name: Write the SHA-256 checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash dist/gss.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  gss.exe" | Out-File -Encoding ascii -NoNewline dist/gss.exe.sha256
+          Get-Content dist/gss.exe.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gss-exe
+          path: |
+            dist/gss.exe
+            dist/gss.exe.sha256
+
+      - name: Attach to the release
+        if: env.TAG != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$env:TAG" dist/gss.exe dist/gss.exe.sha256 --clobber

@@ -39,6 +39,7 @@ Please give a fix time to ship before disclosing details publicly. **90 days** i
 
 Anything that lets gss do something to a user's PC or data that they didn't ask for, for example:
 
+- **Problems with the release build**, such as a `gss.exe` that differs from what the tagged source code and [the build workflow](.github/workflows/release.yml) produce
 - **Writing, deleting or replacing files outside** the intended save folder or output folder, for example through a crafted backup ZIP, manifest, save index or game list
 - **Losing or corrupting saves** in ways the safety backups don't cover: a command that changes saves without making a `..._before_*.zip` first, or a failed rollback
 - **Running commands or code** from data gss reads, such as game names, package names or backup contents
@@ -71,4 +72,5 @@ These protections help with assessing a report. A report showing that one of the
 
 - **Only restore backups you made yourself**, or that come from someone you trust. A backup replaces an account's saves, and is checked for format but not for what the saves contain.
 - **Backups contain personal data:** your progress, and your Xbox account ID in file names and inside the ZIP. Don't share them publicly.
+- **Download `gss.exe` only from this repository's [releases](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases).** It's built by GitHub Actions from the tagged source code. Compare it with the release's `gss.exe.sha256` (`certutil -hashfile gss.exe SHA256`) to make sure it wasn't changed.
 - **Keep gss up to date** to get security fixes.

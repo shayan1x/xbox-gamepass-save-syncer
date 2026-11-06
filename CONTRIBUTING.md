@@ -138,7 +138,7 @@ These keep users' saves safe. A pull request that breaks one needs a very good r
 3. **Refuse rather than guess.** If a folder is half-synced, a name is ambiguous, or the data looks wrong, stop with a clear `GssError` that says what to do.
 4. **The library doesn't print or prompt.** Only `cli.py` talks to the user. Library functions take a `confirm` callback where a question is needed.
 5. **Errors users will see are `GssError`s**, written as plain sentences that say what to do next. Tracebacks are for bugs.
-6. **Python standard library only.** No dependencies, so the tool keeps running from a downloaded ZIP.
+6. **Python standard library only.** No dependencies, so the tool keeps running from a downloaded ZIP and `gss.exe` stays small. PyInstaller is only needed to build `gss.exe`.
 7. **Python 3.10 compatible.** Don't use newer syntax or library features.
 
 ### Tests
@@ -192,8 +192,29 @@ gss follows [Semantic Versioning](https://semver.org/):
 
 To release:
 1. Set the version in **both** [`pyproject.toml`](pyproject.toml) and [`src/gss/__init__.py`](src/gss/__init__.py).
-2. Commit, then tag the commit `vX.Y.Z`.
+2. Commit, then tag the commit `vX.Y.Z` and push both.
 3. Create a GitHub release from the tag, with notes on what changed for users.
+4. Publishing the release starts the [Build gss.exe](.github/workflows/release.yml) workflow. It:
+   - runs the tests
+   - builds `gss.exe`
+   - checks it with [`packaging/smoke_test.py`](packaging/smoke_test.py), including that its version matches the tag
+   - attaches `gss.exe` and `gss.exe.sha256` to the release
+
+   Check the **Actions** tab if they don't appear after a few minutes.
+
+To build `gss.exe` yourself:
+
+```bash
+python -m pip install pyinstaller==6.11.1
+```
+```bash
+python -m PyInstaller packaging/gss.spec
+```
+```bash
+python packaging/smoke_test.py dist/gss.exe
+```
+
+The build settings are in [`packaging/gss.spec`](packaging/gss.spec). It starts from `packaging/gss_exe.py`, not `gss.py`, because a script named `gss.py` would hide the `gss` package inside the `.exe`.
 
 Never move or re-create a tag that has been pushed: people who downloaded that version should be able to get the same files again.
 

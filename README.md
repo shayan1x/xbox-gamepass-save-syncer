@@ -63,7 +63,7 @@ You played 40 hours on one Xbox account and now want that progress on another, f
 - **Undo:** every command that changes saves backs them up first, and puts them back if anything fails.
 - **Checksums:** backups carry a checksum for every file, checked on writing and before restoring.
 - **Sync-aware:** it refuses to touch a half-synced folder, and shows you what will change before asking.
-- **No dependencies:** only Python's standard library.
+- **Nothing to install:** download `gss.exe` and run it. From source, it only needs Python's standard library.
 
 ### Tested games
 
@@ -83,27 +83,38 @@ Other games should work the same way. If you've tried one, please [let us know](
 
 #### Requirements
 
-- Windows 10 or 11, with games installed from the **Xbox app** (PC Game Pass).
-- **Python 3.10 or newer** from [python.org](https://www.python.org/downloads/windows/). In the installer, tick **"Add python.exe to PATH"**.
+Windows 10 or 11, with games installed from the **Xbox app** (PC Game Pass). Nothing else is needed.
 
-#### Install
+#### Install: download gss.exe (easiest)
 
-1. Download this project (the green **Code** button → **Download ZIP**) and unzip it.
-2. Open the unzipped folder in File Explorer, click the address bar, type `cmd` and press **Enter**. A Command Prompt opens in that folder.
-3. Check that it works:
+1. Download **`gss.exe`** from the [latest release](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases/latest).
+2. Put it in a folder of its own, for example `Documents\gss`. Backups are saved in a `backups` folder next to where you run it.
+3. Open that folder in File Explorer, click the address bar, type `cmd` and press **Enter**. A Command Prompt opens in that folder.
+4. Check that it works:
+
+   ```bash
+   gss --version
+   ```
+
+gss is a command-line tool: you type commands into the Command Prompt. Double-clicking `gss.exe` only shows a short guide.
+
+> [!NOTE]
+> **The commands in this README start with `python gss.py`.** With `gss.exe`, type **`gss`** instead, for example `gss list`.
+>
+> Windows SmartScreen or your antivirus may warn about `gss.exe`, because it's a new, unsigned program. It's built automatically by GitHub from the source code in this repository, and each release lists its SHA-256 checksum in `gss.exe.sha256`. To check your download, run `certutil -hashfile gss.exe SHA256` and compare the result.
+
+<details>
+<summary>Run from the source code with Python instead</summary>
+
+1. Install **Python 3.10 or newer** from [python.org](https://www.python.org/downloads/windows/). In the installer, tick **"Add python.exe to PATH"**.
+2. Download this project (the green **Code** button → **Download ZIP**) and unzip it.
+3. Open a Command Prompt in the unzipped folder, as above, and check that it works:
 
    ```bash
    python gss.py --version
    ```
 
-<details>
-<summary>Prefer a <code>gss</code> command that works in any folder?</summary>
-
-```bash
-pip install .
-```
-
-Then type `gss` instead of `python gss.py`, for example `gss list`.
+For a `gss` command that works in any folder, run `pip install .` in the project folder.
 </details>
 
 #### Copy a save in 3 commands
@@ -297,7 +308,9 @@ gss doesn't modify games or save contents. It moves your own save files between 
 - **My game isn't in `list`:** it has no Xbox saves on this PC yet. Start it once and save. Steam/Epic games aren't Xbox saves.
 - **`extract` skips my game:** it isn't in the conversion list. Copy, backup, restore and reset still work. To ask for support, open an issue at [XGP-save-extractor](https://github.com/Z1ni/XGP-save-extractor/issues/new/choose).
 - **GAMERTAG shows "-":** only the account signed in to the Xbox app has a known gamertag.
-- **`python` is not recognized:** reinstall Python with "Add python.exe to PATH" ticked, then open a new Command Prompt.
+- **`python` is not recognized:** use [`gss.exe`](#install-download-gssexe-easiest) instead, or reinstall Python with "Add python.exe to PATH" ticked and open a new Command Prompt.
+- **`gss` is not recognized:** the Command Prompt isn't open in the folder with `gss.exe`. Open it from that folder's address bar, or type the full path, for example `C:\Users\you\Documents\gss\gss.exe list`.
+- **Windows or my antivirus warns about `gss.exe`:** see the note under [Install](#install-download-gssexe-easiest). If in doubt, run gss from the source code with Python instead.
 </details>
 
 ---
