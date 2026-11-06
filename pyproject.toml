@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gamepass-save-syncer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Back up, restore and move Xbox Game Pass for PC saves between Xbox accounts, and convert them for Steam/Epic."
 readme = "README.md"
 requires-python = ">=3.10"
