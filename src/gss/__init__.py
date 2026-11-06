@@ -1,6 +1,6 @@
 """gamepass-save-syncer (gss): back up, restore and move Xbox Game Pass for PC saves."""
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 class GssError(Exception):
