@@ -86,18 +86,57 @@ Windows 10 or 11, with games installed from the **Xbox app** (PC Game Pass). Not
 
 #### Install
 
-1. **Download [`gss.exe`](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases/latest/download/gss.exe)** (about 6 MB) from the [latest release](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases/latest). It's a single program; there's nothing to install.
-2. **Put it in a folder of its own**, for example `Documents\gss`. gss keeps your backups in a `backups` folder inside the folder you run it from.
-3. **Open a Command Prompt in that folder:** open the folder in File Explorer, click the address bar, type `cmd` and press **Enter**.
-4. **Check that it works:**
+gss is a single program, `gss.exe`, that you run from a **Command Prompt**. There's nothing to install.
+
+1. **Download [`gss.exe`](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases/latest/download/gss.exe)** (about 6 MB) from the [latest release](https://github.com/shayan1x/xbox-gamepass-save-syncer/releases/latest). If your browser asks, choose **Keep**.
+2. **Make a folder for it**, for example **`Documents\gss`**, and move `gss.exe` there from your Downloads folder. gss keeps your backups in a `backups` folder inside it.
+   > Windows usually hides file extensions, so `gss.exe` may just show up as **`gss`**. That's the same file.
+3. **Open a Command Prompt in that folder:**
+   1. Open the `gss` folder in File Explorer, so you can see `gss.exe` in it.
+   2. Click the **address bar** at the top, type **`cmd`** and press **Enter**.
+
+   A black window opens. Its prompt ends with the folder's name, for example `C:\Users\you\Documents\gss>`.
+4. **Check that it works.** Type this and press **Enter**:
 
    ```bash
    gss --version
    ```
 
-   It prints the version, for example `gss 0.1.2`.
+   It prints the version, for example `gss 0.1.2`. You're ready: type the commands from this README into this window.
 
-gss is a command-line tool: you type the commands in this README into that Command Prompt. Double-clicking `gss.exe` just shows a short guide.
+**Each time you use gss**, open the Command Prompt **in that folder**, as in step 3. `gss` only works in the folder that contains `gss.exe`. Double-clicking `gss.exe` only shows a short guide.
+
+<details>
+<summary><b>Using PowerShell or Windows Terminal?</b> Type <code>.\gss</code> instead of <code>gss</code></summary>
+
+Windows 11's **Open in Terminal** opens **PowerShell**, not Command Prompt. You can tell it's PowerShell because the prompt starts with **`PS`**, for example `PS C:\Users\you\Documents\gss>`.
+
+PowerShell doesn't run programs from the current folder unless you put **`.\`** in front. So in PowerShell, type **`.\gss`** wherever this README says `gss`:
+
+```powershell
+.\gss --version
+```
+```powershell
+.\gss list
+```
+
+`.\gss` works in Command Prompt too, if you'd rather type one form everywhere.
+</details>
+
+<details>
+<summary><b>"gss is not recognized"?</b></summary>
+
+| What you see | What it means | Fix |
+|---|---|---|
+| `'gss' is not recognized as an internal or external command` | Command Prompt isn't open in the folder with `gss.exe` | Open it from that folder's address bar (step 3), or go there with `cd /d "%USERPROFILE%\Documents\gss"` |
+| `gss : The term 'gss' is not recognized as the name of a cmdlet` | You're in **PowerShell** | Type **`.\gss`** instead of `gss`, from the folder with `gss.exe` |
+| `.\gss : The term '.\gss' is not recognized` | PowerShell isn't open in the folder with `gss.exe` | Go there with `cd "$HOME\Documents\gss"`, then try again |
+
+The full path to `gss.exe` works from any folder. Replace `you` with your Windows user name:
+
+- Command Prompt: `"C:\Users\you\Documents\gss\gss.exe" list`
+- PowerShell: `& "C:\Users\you\Documents\gss\gss.exe" list` (with the `&` in front)
+</details>
 
 > [!NOTE]
 > **"Windows protected your PC" or an antivirus warning?** `gss.exe` is new and not code-signed, so Windows SmartScreen may warn about it. Click **More info → Run anyway** if you trust the download.
@@ -313,7 +352,7 @@ gss doesn't modify games or save contents. It moves your own save files between 
 - **My game isn't in `list`:** it has no Xbox saves on this PC yet. Start it once and save. Steam/Epic games aren't Xbox saves.
 - **`extract` skips my game:** it isn't in the conversion list. Copy, backup, restore and reset still work. To ask for support, open an issue at [XGP-save-extractor](https://github.com/Z1ni/XGP-save-extractor/issues/new/choose).
 - **GAMERTAG shows "-":** only the account signed in to the Xbox app has a known gamertag.
-- **`gss` is not recognized:** the Command Prompt isn't open in the folder with `gss.exe`. Open it from that folder's address bar (see [Install](#install)), or type the full path, for example `C:\Users\you\Documents\gss\gss.exe list`.
+- **`gss` is not recognized:** either the window isn't open in the folder with `gss.exe`, or it's **PowerShell**, where you type `.\gss` instead. The [Install](#install) section has a table of the error messages and fixes.
 - **The window closes straight away when I open `gss.exe`:** gss is a command-line tool. Run it from a Command Prompt, as in [Install](#install).
 - **Windows or my antivirus warns about `gss.exe`:** see the note under [Install](#install). If in doubt, check the download against `gss.exe.sha256`, or run gss from the source code with Python instead.
 - **`python` is not recognized** (running from the source code): reinstall Python with "Add python.exe to PATH" ticked and open a new Command Prompt, or use `gss.exe` instead.
