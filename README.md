@@ -355,9 +355,9 @@ XUIDs can be decimal (`2535412345678901`) or hex (`000901F1B0392C35`). Every com
 
 ## Contributing
 
-Bug reports, tested games and pull requests are welcome.
+Bug reports, tested games and pull requests are welcome. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the details.
 
-- **Report a problem:** include the output of `gss status` for the game. It shows the sync state without any save contents.
+- **Report a problem:** include the output of `gss status` for the game. It shows the sync state without any save contents. Replace your Xbox account IDs (XUIDs) with made-up ones before posting.
 - **Add a game for `extract`:** add it to [`src/gss/games.json`](src/gss/games.json) with one of the handlers in [`src/gss/extract.py`](src/gss/extract.py).
 - **Run the tests:** they build fake saves in a temp folder and never touch real ones.
 
