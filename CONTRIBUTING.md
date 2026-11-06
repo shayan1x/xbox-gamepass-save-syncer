@@ -2,6 +2,8 @@
 
 Thanks for helping! gss handles people's game saves, often hundreds of hours of progress, so this guide puts **safety first**. Most of it is about keeping that true.
 
+Using an AI coding agent? Point it at [AGENTS.md](AGENTS.md), which has the same rules plus the commands, checks and known pitfalls an agent needs.
+
 There are many ways to help, and most don't need any code:
 
 - [Report a tested game](#report-a-tested-game): the most useful contribution right now
