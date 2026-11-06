@@ -43,7 +43,7 @@ You played 40 hours on one Xbox account and now want that progress on another, f
 **gss** writes the copied saves the way Xbox expects a save made on this PC. They keep the target account's own cloud sync information and are marked as changed, so Xbox **uploads** them to the target account's cloud storage instead of replacing them. It also backs up whatever it replaces first, so every change can be undone.
 
 > [!NOTE]
-> Tested end to end, including the cloud upload, with **DOOM: The Dark Ages**. Copy works with **any** Game Pass game that uses Xbox cloud saves, because it never needs to understand the save files themselves.
+> Tested end to end, including the cloud upload, with **DOOM: The Dark Ages**, **Crash Bandicoot™ N. Sane Trilogy** and **Resident Evil Village** (see [tested games](#tested-games)). Copy works with **any** Game Pass game that uses Xbox cloud saves, because it never needs to understand the save files themselves.
 
 ---
 
@@ -64,6 +64,18 @@ You played 40 hours on one Xbox account and now want that progress on another, f
 - **Checksums:** backups carry a checksum for every file, checked on writing and before restoring.
 - **Sync-aware:** it refuses to touch a half-synced folder, and shows you what will change before asking.
 - **No dependencies:** only Python's standard library.
+
+### Tested games
+
+Games where copying a save to another Xbox account has been checked end to end: copied, loaded in the game, and uploaded to the cloud.
+
+| Game | Copy between accounts |
+|---|---|
+| DOOM: The Dark Ages | ✅ |
+| Crash Bandicoot™ N. Sane Trilogy | ✅ |
+| Resident Evil Village | ✅ |
+
+Other games should work the same way. If you've tried one, please [let us know](#contributing), whether it worked or not.
 
 ---
 
@@ -246,7 +258,7 @@ The list and its test status come from [XGP-save-extractor](https://github.com/Z
 <details>
 <summary><b>Does copy work for my game?</b></summary>
 
-Copy works for every Game Pass game whose saves `gss list` shows. gss never reads or changes the save files themselves, so it doesn't need to know the game. Only `extract` is limited to the games in [games.json](src/gss/games.json). It's been tested end to end with DOOM: The Dark Ages.
+Copy works for every Game Pass game whose saves `gss list` shows. gss never reads or changes the save files themselves, so it doesn't need to know the game. Only `extract` is limited to the games in [games.json](src/gss/games.json). It's been tested end to end with the games in [tested games](#tested-games).
 </details>
 
 <details>
