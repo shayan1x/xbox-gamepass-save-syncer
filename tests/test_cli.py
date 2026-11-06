@@ -104,6 +104,68 @@ class ListTest(FakePackages):
 
 
 class CliTest(FakePackages):
+    def no_arguments(self, double_click: bool):
+        import builtins
+        asked = []
+        original_input, original_check = builtins.input, cli.opened_by_double_click
+        builtins.input = lambda prompt="": asked.append(prompt) or ""
+        cli.opened_by_double_click = lambda: double_click
+        import io
+        from contextlib import redirect_stdout
+        out = io.StringIO()
+        try:
+            with redirect_stdout(out):
+                code = cli.main([])
+        finally:
+            builtins.input, cli.opened_by_double_click = original_input, original_check
+        return code, out.getvalue(), asked
+
+    def test_no_arguments_shows_a_guide(self):
+        code, out, asked = self.no_arguments(double_click=False)
+        self.assertEqual(code, 0)
+        self.assertIn("This is a command-line tool", out)
+        self.assertIn("copy --game", out)
+        self.assertIn("usage:", out)
+        self.assertEqual(asked, [])  # run from Command Prompt: don't wait
+
+    def test_double_click_waits_before_closing(self):
+        code, out, asked = self.no_arguments(double_click=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(len(asked), 1)
+        self.assertIn("Press Enter", asked[0])
+
+    def test_double_click_detection_from_a_terminal(self):
+        # The tests run in a shared console, never one opened just for them
+        self.assertFalse(cli.opened_by_double_click())
+
+    def test_program_name(self):
+        import sys
+        original_argv, original_frozen = sys.argv, getattr(sys, "frozen", None)
+        try:
+            sys.argv = ["C:\\gss\\gss.py"]
+            self.assertEqual(cli.program_name(), "python gss.py")
+            sys.argv = ["C:\\venv\\Scripts\\gss.exe"]
+            self.assertEqual(cli.program_name(), "gss")
+            sys.argv, sys.frozen = ["gss.py"], True
+            self.assertEqual(cli.program_name(), "gss")
+        finally:
+            sys.argv = original_argv
+            if original_frozen is None:
+                del sys.frozen
+            else:
+                sys.frozen = original_frozen
+
+    def test_version_is_always_gss(self):
+        from gss import __version__
+        with self.assertRaises(SystemExit):
+            self.gss("--version")
+        import io
+        from contextlib import redirect_stdout
+        out = io.StringIO()
+        with redirect_stdout(out), self.assertRaises(SystemExit):
+            cli.main(["--version"])
+        self.assertEqual(out.getvalue().strip(), f"gss {__version__}")
+
     def test_bad_xuid_is_a_usage_error(self):
         with self.assertRaises(SystemExit) as e:
             self.gss("backup", "--user", "not-a-xuid")

@@ -290,11 +290,11 @@ def cmd_extract(args, packages_root: Path) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="gss",
+        prog=program_name(),
         description="gamepass-save-syncer: back up, restore and move Xbox Game Pass for PC saves "
         "between Xbox accounts, and convert them for Steam/Epic.",
     )
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument("--version", action="version", version=f"gss {__version__}")
     parser.add_argument("--packages-root", type=Path, default=None, help=argparse.SUPPRESS)
     sub = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 
@@ -358,12 +358,56 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def program_name() -> str:
+    """How the user started gss, for usage examples: gss (installed or gss.exe) or python gss.py."""
+    if not getattr(sys, "frozen", False) and sys.argv and sys.argv[0].lower().endswith(".py"):
+        return "python gss.py"
+    return "gss"
+
+
+def opened_by_double_click() -> bool:
+    """Whether Windows opened a console window just for gss, which closes as soon as gss exits."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        processes = (ctypes.c_uint * 4)()
+        count = ctypes.windll.kernel32.GetConsoleProcessList(processes, len(processes))
+    except (AttributeError, OSError):
+        return False
+    # Run from Command Prompt, the console is shared with cmd.exe. Opened by a double-click, gss
+    # is alone in it, together with the launcher of a one-file PyInstaller build if it is gss.exe.
+    alone = 2 if getattr(sys, "frozen", False) else 1
+    return 0 < count <= alone
+
+
+def show_welcome(parser: argparse.ArgumentParser) -> None:
+    prog = program_name()
+    print(f"gamepass-save-syncer {__version__}: copy, back up and restore Xbox Game Pass PC saves.\n")
+    print("This is a command-line tool. Open Command Prompt in this folder and type a command, for example:\n")
+    print("  See your games and Xbox account IDs:")
+    print(f"    {prog} list")
+    print("  Copy a game's saves to another Xbox account:")
+    print(f'    {prog} copy --game "<game>" --from <ID> --to <ID>')
+    print("  Check that saves are synced with the cloud:")
+    print(f"    {prog} status\n")
+    print("Tip: in File Explorer, click the address bar of this folder, type cmd and press Enter.")
+    print("Guide: https://github.com/shayan1x/xbox-gamepass-save-syncer#readme\n")
+    parser.print_help()
+
+
 def main(argv: List[str] | None = None) -> int:
     # Game names can contain characters the console can't show; don't crash printing them
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(errors="replace")
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    if not (sys.argv[1:] if argv is None else argv):
+        show_welcome(parser)
+        if opened_by_double_click():
+            input("\nPress Enter to close this window...")
+        return 0
+    args = parser.parse_args(argv)
     packages_root = args.packages_root or default_packages_root()
     try:
         return args.func(args, packages_root)
