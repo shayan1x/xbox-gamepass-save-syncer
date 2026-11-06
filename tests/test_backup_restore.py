@@ -258,6 +258,39 @@ class DamagedBackupTest(FakePackages):
         self.assertEqual(self.run_gss("restore", bad, "-y", "-o", self.out), 1)
         self.assertEqual(snapshot(self.dir_a), a_before)
 
+    def test_manifest_cant_point_restore_outside_packages(self):
+        """The manifest's package and SCID name the folder a restore replaces."""
+        path = self.backup_of(XUID_A)
+        # A folder outside Packages that looks like a save folder, so only validation can protect it
+        victim = self.tmp / "victim" / "SystemAppData" / "wgs" / user_dir_name(XUID_A, SCID)
+        write_user_dir(victim, SAVE_B)
+        victim_before = snapshot(victim)
+
+        def point(**fields):
+            def edit_manifest(entries):
+                manifest = json.loads(entries["manifest.json"])
+                manifest.update(fields)
+                entries["manifest.json"] = json.dumps(manifest).encode()
+            return edit_manifest
+
+        cases = {
+            "package": ["../victim", "..\\victim", "C:\\Windows", "", 5],
+            "scid": ["../../x", "00000000000000000000000071672517\\..", "", "zz", 5],
+            "xuid": [-1, 0, 2**64, "2535412345678901", True],
+            "source_xuid": [-5, "x"],
+            "files": [["wgs/x"], "x"],
+        }
+        for field, values in cases.items():
+            for value in values:
+                with self.subTest(field=field, value=value):
+                    bad = self.tamper(path, point(**{field: value}))
+                    with self.assertRaises(GssError):
+                        backup.read_backup(bad)
+                    self.assertEqual(self.run_gss("restore", bad, "-y", "-o", self.out), 1)
+                    bad.unlink()
+        self.assertEqual(snapshot(victim), victim_before)
+        self.assertEqual(saves(self.dir_a), SAVE_A)
+
     def test_other_bad_inputs(self):
         not_backup = self.tmp / "other.zip"
         with zipfile.ZipFile(not_backup, "w") as zf:

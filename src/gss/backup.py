@@ -10,6 +10,7 @@ The format is the same as swapper.py's, so its backups can be restored too.
 import hashlib
 import json
 import os
+import re
 import shutil
 import zipfile
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ from gss import GssError, __version__
 from gss.accounts import user_dir_name
 from gss.discovery import UserSave
 from gss.fsutil import list_files, safe_relpath, sha256_file, slugify, unique_path
-from gss.games import fallback_name
+from gss.games import PACKAGE_FAMILY_RE, fallback_name
 from gss.wgs import INDEX_NAME, read_saves
 
 FORMAT_VERSION = 1
@@ -151,7 +152,17 @@ def read_backup(zip_path: Path) -> Backup:
             for key in ("package", "scid", "xuid", "files"):
                 if key not in manifest:
                     raise GssError(f"Backup manifest is missing {key!r}")
-            int(manifest["scid"], 16)
+            # These name the folder a restore replaces, so they must not be able to point anywhere else
+            if not isinstance(manifest["package"], str) or not PACKAGE_FAMILY_RE.fullmatch(manifest["package"]):
+                raise GssError(f"Backup has an invalid game ID: {manifest['package']!r}")
+            if not isinstance(manifest["scid"], str) or not re.fullmatch(r"[0-9A-Fa-f]{1,64}", manifest["scid"]):
+                raise GssError(f"Backup has an invalid save container ID: {manifest['scid']!r}")
+            for key in ("xuid", "source_xuid"):
+                value = manifest.get(key, 1)
+                if not isinstance(value, int) or isinstance(value, bool) or not 0 < value < 2**64:
+                    raise GssError(f"Backup has an invalid Xbox account ID: {value!r}")
+            if not isinstance(manifest["files"], dict):
+                raise GssError("Backup manifest has an invalid file list")
 
             entries = {
                 safe_relpath(n[len(WGS_PREFIX):])
